@@ -91,7 +91,7 @@ ui (contrôleurs, vues Swing) → service (règles métier, droits) → reposito
 | `ma.dentalpro.repository.jdbc` | Utilitaires JDBC et `RowMappers` |
 | `ma.dentalpro.service` | Interfaces et implémentations des services |
 | `ma.dentalpro.ui.controllers` | Contrôleurs d'interface |
-| `ma.dentalpro.shared` | Exceptions et utilitaires communs |
+| `ma.dentalpro.shared` | Exceptions et utilitaires communs (`ListUtil` : méthodes génériques sur les listes) |
 
 ## Planning des sprints
 
