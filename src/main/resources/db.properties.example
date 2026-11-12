@@ -1,0 +1,13 @@
+# ————————————————————————————————————————————————————————————————————————————————————————————————
+# Modèle de configuration JDBC MySQL.
+# 1. Copier ce fichier en "db.properties" dans le même dossier (src/main/resources).
+# 2. Remplacer les valeurs par celles de votre serveur MySQL local.
+# db.properties est ignoré par Git : aucun mot de passe n'est versionné (BNF-02).
+#
+# Chaque valeur peut aussi être fournie par une variable d'environnement, qui est alors prioritaire :
+#   DENTALPRO_DB_URL, DENTALPRO_DB_USER, DENTALPRO_DB_PASSWORD
+# ————————————————————————————————————————————————————————————————————————————————————————————————
+dataSource.driver               = com.mysql.cj.jdbc.Driver
+dataSource.url                  = jdbc:mysql://localhost:3306/dentalSoftBD
+dataSource.user                 = root
+dataSource.pass                 = CHANGE_ME
