@@ -20,7 +20,7 @@ public class PatientRepoImpl implements PatientRepo {
     public Patient findById(Long identity) {
         return VirtualDataBase.patients()
                 .stream()
-                .filter(p -> Objects.equals(p.getIdPatient(), identity))
+                .filter(p -> Objects.equals(p.getId(), identity))
                 .findFirst()
                 .orElse(null);
     }
@@ -30,7 +30,7 @@ public class PatientRepoImpl implements PatientRepo {
         var motCle = mc == null ? "" : mc.trim().toLowerCase();
         return VirtualDataBase.patients()
                 .stream()
-                .filter(p -> p.getNom() != null && p.getNom().toLowerCase().contains(motCle))
+                .filter(p -> contient(p.getNom(), motCle) || contient(p.getPrenom(), motCle))
                 .sorted()
                 .toList();
     }
@@ -41,17 +41,17 @@ public class PatientRepoImpl implements PatientRepo {
             throw new IllegalArgumentException("Le patient à enregistrer ne peut pas être null");
         }
         var maxId = VirtualDataBase.patients().stream()
-                .mapToLong(Patient::getIdPatient)
+                .mapToLong(Patient::getId)
                 .max()
                 .orElse(0L);
-        newElement.setIdPatient(maxId + 1);
+        newElement.setId(maxId + 1);
         VirtualDataBase.patients().add(newElement);
         return newElement;
     }
 
     @Override
     public synchronized boolean update(Patient newValuesElement) {
-        if (newValuesElement == null || newValuesElement.getIdPatient() == null) {
+        if (newValuesElement == null || newValuesElement.getId() == null) {
             return false;
         }
         var index = VirtualDataBase.patients().indexOf(newValuesElement);
@@ -70,5 +70,9 @@ public class PatientRepoImpl implements PatientRepo {
     @Override
     public boolean deleteById(Long identity) {
         return delete(findById(identity));
+    }
+
+    private static boolean contient(String valeur, String motCleMinuscule) {
+        return valeur != null && valeur.toLowerCase().contains(motCleMinuscule);
     }
 }

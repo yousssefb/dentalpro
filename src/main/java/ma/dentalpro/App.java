@@ -1,57 +1,32 @@
 package ma.dentalpro;
 
-
 import ma.dentalpro.config.ApplicationContext;
-import ma.dentalpro.domain.Patient;
 import ma.dentalpro.shared.RepositoryException;
 import ma.dentalpro.ui.controllers.api.PatientController;
 
+/**
+ * Point d'entrée provisoire (console) : vérifie que la chaîne
+ * Controller → Service → Repository → MySQL fonctionne sur les données de seed.sql.
+ * Il sera remplacé par la fenêtre de connexion Swing.
+ */
 public class App {
 
     public static void main(String[] args) {
-        PatientController myController;
+        PatientController controller;
         try {
-            myController = ApplicationContext.getInstance().getBean(PatientController.class);
+            controller = ApplicationContext.getInstance().getBean(PatientController.class);
         } catch (IllegalStateException e) {
             System.err.println("[DÉMARRAGE IMPOSSIBLE] " + e.getMessage());
             return;
         }
 
         try {
-            var patientOmar = myController.save(new Patient(null, "Omar", 29));
-            System.out.printf(
-                    "[SUCCÈS] Patient créé : id=%d, nom=%s, âge=%d%n",
-                    patientOmar.getIdPatient(),
-                    patientOmar.getNom(),
-                    patientOmar.getAge()
-            );
+            System.out.println("\nPatients (triés par nom) :");
+            controller.getAllPatients();
 
-            var patientAnis = myController.save(new Patient(null, "Anis", 34));
-            System.out.printf(
-                    "[SUCCÈS] Patient créé : id=%d, nom=%s, âge=%d%n",
-                    patientAnis.getIdPatient(),
-                    patientAnis.getNom(),
-                    patientAnis.getAge()
-            );
-
-            var patientMisAJour = new Patient(1L, "Rayane", 23);
-            var modificationReussie = myController.update(patientMisAJour);
-            System.out.printf(
-                    "[%s] Mise à jour du patient id=%d%n",
-                    modificationReussie ? "SUCCÈS" : "ÉCHEC",
-                    patientMisAJour.getIdPatient()
-            );
-
-            var idPatientASupprimer = 1L;
-            var suppressionReussie = myController.delete(idPatientASupprimer);
-            System.out.printf(
-                    "[%s] Suppression du patient id=%d%n",
-                    suppressionReussie ? "SUCCÈS" : "ÉCHEC",
-                    idPatientASupprimer
-            );
-
-            System.out.println("\nListe actuelle des patients :");
-            myController.getAllPatients();
+            System.out.println("\nRecherche « ben » :");
+            controller.findByNomLike("ben")
+                    .forEach(p -> System.out.printf("- #%d %s, tél. %s%n", p.getId(), p.getNomComplet(), p.getTelephone()));
         } catch (RepositoryException e) {
             System.err.println(e.getSummary());
         }

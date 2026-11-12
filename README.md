@@ -18,10 +18,16 @@ Java Swing · JDBC · MySQL · Maven · Lombok — sans Spring, Hibernate ni aut
 
 ## Installation
 
-1. **Créer la base de données** (MySQL doit être démarré) :
+1. **Créer la base de données** (MySQL doit être démarré). `schema.sql` supprime puis recrée
+   la base `dentalSoftBD` (20 tables) ; `seed.sql` charge les données fictives de démonstration :
    ```bash
    mysql -u root -p < src/main/resources/db/schema.sql
    ```
+   ```bash
+   mysql -u root -p < src/main/resources/db/seed.sql
+   ```
+   Les comptes de démonstration et leurs mots de passe de test sont listés en tête de `seed.sql`.
+   Les dates du jeu d'essai sont relatives au jour du chargement (RDV du jour, file d'attente…).
 2. **Configurer la connexion** : copier `src/main/resources/db.properties.example` en
    `src/main/resources/db.properties`, puis renseigner l'utilisateur et le mot de passe MySQL.
    Ce fichier est ignoré par Git : aucun mot de passe n'est versionné.
@@ -45,6 +51,24 @@ mvn clean verify
 ```
 
 Compile le projet, exécute les tests JUnit et produit `target/dentalpro-1.0-SNAPSHOT.jar`.
+
+- `*Test` : tests unitaires, sans base de données.
+- `*IT` : tests d'intégration sur MySQL (base chargée avec `schema.sql` + `seed.sql`). Chaque test
+  s'exécute dans une transaction annulée, la base n'est donc pas modifiée. Ils sont ignorés
+  automatiquement si `db.properties` est absent ou si MySQL est arrêté.
+
+## Base de données
+
+| Domaine | Tables |
+|---|---|
+| Administration | `cabinet`, `utilisateur`, `role`, `utilisateur_role` |
+| Accueil et agenda | `patient`, `dossier_medical`, `rdv`, `indisponibilite` |
+| Clinique | `antecedent`, `dossier_antecedent`, `consultation`, `acte`, `intervention`, `medicament`, `ordonnance`, `prescription`, `certificat` |
+| Caisse et pilotage | `facture`, `paiement`, `charge` |
+
+Les contraintes (clés étrangères, unicités, `CHECK`) protègent l'intégrité ; les règles portant sur
+plusieurs lignes (chevauchement des RDV, reste à payer…) sont contrôlées dans les services.
+Les choix pris en l'absence de décision de l'enseignant sont listés dans [docs/decisions.md](docs/decisions.md).
 
 ## Architecture
 

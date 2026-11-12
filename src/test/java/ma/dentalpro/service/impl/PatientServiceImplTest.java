@@ -21,8 +21,8 @@ class PatientServiceImplTest {
     void getPatientsSortedByNameTrieDeAaZ() {
         var noms = service.getPatientsSortedByName().stream().map(Patient::getNom).toList();
 
-        assertEquals("Amina", noms.getFirst());
-        assertEquals("Tarek", noms.getLast());
+        assertEquals("Alaoui", noms.getFirst());
+        assertEquals("Tazi", noms.getLast());
         assertEquals(noms.stream().sorted(String.CASE_INSENSITIVE_ORDER).toList(), noms);
     }
 }
