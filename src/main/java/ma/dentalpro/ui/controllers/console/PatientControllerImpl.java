@@ -29,6 +29,12 @@ public class PatientControllerImpl implements PatientController {
     }
 
     @Override
+    public List<Patient> findAll() {
+        // Le contrôleur ne fait aucun traitement : il demande simplement la liste au service.
+        return service.getPatientsSortedByName();
+    }
+
+    @Override
     public Patient save(Patient patient) {
         return service.save(patient);
     }
