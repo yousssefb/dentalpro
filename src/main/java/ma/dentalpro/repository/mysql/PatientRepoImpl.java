@@ -35,15 +35,23 @@ public class PatientRepoImpl implements PatientRepo {
         if (identity == null) {
             return null;
         }
-        var resultat = query(SELECT_PATIENT + " WHERE id = ?",
+        List<Patient> resultat = query(SELECT_PATIENT + " WHERE id = ?",
                 "Erreur pendant la recherche du patient " + identity, identity);
-        return resultat.isEmpty() ? null : resultat.getFirst();
+        if (resultat.isEmpty()) {
+            return null; // aucun patient avec cet identifiant
+        }
+        return resultat.get(0);
     }
 
     /** Recherche par nom ou prénom (contient, insensible à la casse), patients archivés compris. */
     @Override
     public List<Patient> findByNomLike(String mc) {
-        var motif = "%" + (mc == null ? "" : mc.trim()) + "%";
+        String motCle = "";
+        if (mc != null) {
+            motCle = mc.trim();
+        }
+        // Les % autour du mot-clé veulent dire « contient » en SQL.
+        String motif = "%" + motCle + "%";
         return query(SELECT_PATIENT + " WHERE nom LIKE ? OR prenom LIKE ? ORDER BY nom, prenom, id",
                 "Erreur pendant la recherche des patients par nom", motif, motif);
     }
@@ -53,7 +61,7 @@ public class PatientRepoImpl implements PatientRepo {
         if (p == null) {
             throw new IllegalArgumentException("Le patient à enregistrer ne peut pas être null");
         }
-        var sql = "INSERT INTO patient (nom, prenom, date_naissance, sexe, cin, passeport, email, "
+        String sql = "INSERT INTO patient (nom, prenom, date_naissance, sexe, cin, passeport, email, "
                 + "telephone, adresse, assurance, archive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement statement = null;
         ResultSet generatedKeys = null;
@@ -62,12 +70,13 @@ public class PatientRepoImpl implements PatientRepo {
             statement = JdbcUtil.prepareStatement(connection, sql, true,
                     p.getNom(), p.getPrenom(), p.getDateNaissance(), sexe(p), p.getCin(), p.getPasseport(),
                     p.getEmail(), p.getTelephone(), p.getAdresse(), p.getAssurance(), p.isArchive());
-            var affectedRows = statement.executeUpdate();
+            int affectedRows = statement.executeUpdate();
             JdbcUtil.logAffectedRows("Ajout du patient", affectedRows);
             if (affectedRows == 0) {
                 throw new RepositoryException("Aucun patient n'a été ajouté");
             }
 
+            // MySQL renvoie l'identifiant (AUTO_INCREMENT) qu'il vient de créer.
             generatedKeys = statement.getGeneratedKeys();
             if (!generatedKeys.next()) {
                 throw new RepositoryException("MySQL n'a retourné aucun identifiant patient");
@@ -87,7 +96,7 @@ public class PatientRepoImpl implements PatientRepo {
         if (p == null || p.getId() == null) {
             return false;
         }
-        var sql = "UPDATE patient SET nom = ?, prenom = ?, date_naissance = ?, sexe = ?, cin = ?, "
+        String sql = "UPDATE patient SET nom = ?, prenom = ?, date_naissance = ?, sexe = ?, cin = ?, "
                 + "passeport = ?, email = ?, telephone = ?, adresse = ?, assurance = ?, archive = ? "
                 + "WHERE id = ?";
         return executeUpdate(sql, "Modification du patient",
@@ -98,7 +107,10 @@ public class PatientRepoImpl implements PatientRepo {
 
     @Override
     public boolean delete(Patient element) {
-        return element != null && deleteById(element.getId());
+        if (element == null) {
+            return false;
+        }
+        return deleteById(element.getId());
     }
 
     /**
@@ -116,12 +128,17 @@ public class PatientRepoImpl implements PatientRepo {
 
     // ———————————————————————————————————————————————————————————————————————————————————————
 
+    /** Convertit l'enum Sexe en texte pour la base ("HOMME" ou "FEMME"), ou null s'il est absent. */
     private static String sexe(Patient p) {
-        return p.getSexe() == null ? null : p.getSexe().name();
+        if (p.getSexe() == null) {
+            return null;
+        }
+        return p.getSexe().name();
     }
 
+    /** Exécute un SELECT et transforme chaque ligne du résultat en objet Patient. */
     private List<Patient> query(String sql, String errorMessage, Object... parameters) {
-        var patients = new ArrayList<Patient>();
+        List<Patient> patients = new ArrayList<>();
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         try {
@@ -139,11 +156,12 @@ public class PatientRepoImpl implements PatientRepo {
         }
     }
 
+    /** Exécute un UPDATE ou un DELETE et renvoie le nombre de lignes modifiées. */
     private int executeUpdate(String sql, String operation, String errorMessage, Object... parameters) {
         PreparedStatement statement = null;
         try {
             statement = JdbcUtil.prepareStatement(connection, sql, false, parameters);
-            var affectedRows = statement.executeUpdate();
+            int affectedRows = statement.executeUpdate();
             JdbcUtil.logAffectedRows(operation, affectedRows);
             return affectedRows;
         } catch (SQLException e) {

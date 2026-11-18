@@ -30,14 +30,10 @@ public class RepositoryException extends RuntimeException {
      * @return le type de l'exception, le message métier et la cause technique
      */
     public String getSummary() {
-        var causeMessage = getCause() == null
-                ? "Cause technique non disponible"
-                : getCause().getMessage();
-
-        return "[%s] %s — Cause : %s".formatted(
-                getClass().getSimpleName(),
-                getMessage(),
-                causeMessage
-        );
+        String causeMessage = "Cause technique non disponible";
+        if (getCause() != null) {
+            causeMessage = getCause().getMessage();
+        }
+        return "[" + getClass().getSimpleName() + "] " + getMessage() + " — Cause : " + causeMessage;
     }
 }

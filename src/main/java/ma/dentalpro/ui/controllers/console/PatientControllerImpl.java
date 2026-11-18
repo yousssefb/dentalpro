@@ -15,12 +15,17 @@ public class PatientControllerImpl implements PatientController {
 
     @Override
     public void getAllPatients() {
-        var result = service.getPatientsSortedByName();
-        result.forEach(patient -> System.out.printf("- %-22s %3s ans%s%s%n",
-                patient.getNomComplet(),
-                patient.getAge(),
-                patient.isEnfant() ? "  [enfant]" : "",
-                patient.isArchive() ? "  [archivé]" : ""));
+        List<Patient> patients = service.getPatientsSortedByName();
+        for (Patient patient : patients) {
+            String ligne = "- " + patient.getNomComplet() + ", " + patient.getAge() + " ans";
+            if (patient.isEnfant()) {
+                ligne = ligne + "  [enfant]";
+            }
+            if (patient.isArchive()) {
+                ligne = ligne + "  [archivé]";
+            }
+            System.out.println(ligne);
+        }
     }
 
     @Override

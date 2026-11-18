@@ -44,11 +44,16 @@ public final class VirtualDataBase {
     }
 
     private static Patient patient(Long id, String nom, String prenom, String naissance, Sexe sexe) {
+        // Téléphone fictif sur 10 chiffres : 0600000001, 0600000002, ..., 0600000010.
+        String telephone = "06000000" + id;
+        if (id < 10) {
+            telephone = "060000000" + id;
+        }
         return Patient.builder()
                 .id(id).nom(nom).prenom(prenom)
                 .dateNaissance(LocalDate.parse(naissance))
                 .sexe(sexe)
-                .telephone("06000000" + (id < 10 ? "0" + id : id))
+                .telephone(telephone)
                 .build();
     }
 }

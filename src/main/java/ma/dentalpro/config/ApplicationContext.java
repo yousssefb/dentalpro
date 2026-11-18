@@ -34,7 +34,7 @@ public final class ApplicationContext {
     private Connection connection;
 
     private ApplicationContext() {
-        var props = loadProperties(APP_CONFIG, true);
+        Properties props = loadProperties(APP_CONFIG, true);
         props.putAll(loadProperties(DB_CONFIG, false));
 
         try {
@@ -68,7 +68,7 @@ public final class ApplicationContext {
     }
 
     public <T> T getBean(Class<T> beanClass) {
-        var bean = beansByClass.get(beanClass);
+        Object bean = beansByClass.get(beanClass);
         if (bean == null) {
             throw new IllegalStateException("Aucun composant enregistré pour " + beanClass.getSimpleName());
         }
@@ -80,8 +80,9 @@ public final class ApplicationContext {
     // ———————————————————————————————————————————————————————————————————————————————————————
 
     private static Properties loadProperties(String fileName, boolean required) {
-        var props = new Properties();
-        var cl = Thread.currentThread().getContextClassLoader();
+        Properties props = new Properties();
+        // Le fichier est cherché dans src/main/resources (le « classpath »).
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
         try (InputStream in = cl.getResourceAsStream(fileName)) {
             if (in == null) {
                 if (required) {
@@ -105,7 +106,7 @@ public final class ApplicationContext {
      * n'a qu'un constructeur sans argument. Les deux sont acceptés.
      */
     private <T> T createRepository(String className, Class<T> type) {
-        var clazz = loadClass(className, type);
+        Class<?> clazz = loadClass(className, type);
         try {
             return type.cast(clazz.getDeclaredConstructor(Connection.class).newInstance(connection));
         } catch (NoSuchMethodException e) {
@@ -116,11 +117,16 @@ public final class ApplicationContext {
     }
 
     private static <T, D> T create(String className, Class<T> type, Class<D> dependencyType, D dependency) {
-        var clazz = loadClass(className, type);
+        Class<?> clazz = loadClass(className, type);
         try {
-            Object bean = dependencyType == null
-                    ? clazz.getDeclaredConstructor().newInstance()
-                    : clazz.getDeclaredConstructor(dependencyType).newInstance(dependency);
+            Object bean;
+            if (dependencyType == null) {
+                // Constructeur sans argument.
+                bean = clazz.getDeclaredConstructor().newInstance();
+            } else {
+                // Constructeur qui reçoit sa dépendance (exemple : le service reçoit le repository).
+                bean = clazz.getDeclaredConstructor(dependencyType).newInstance(dependency);
+            }
             return type.cast(bean);
         } catch (ReflectiveOperationException e) {
             throw creationError(className, e);
@@ -133,7 +139,7 @@ public final class ApplicationContext {
                     "Aucune implémentation configurée pour " + expectedType.getSimpleName());
         }
         try {
-            var clazz = Class.forName(className.trim());
+            Class<?> clazz = Class.forName(className.trim());
             if (!expectedType.isAssignableFrom(clazz)) {
                 throw new IllegalStateException(
                         className + " n'implémente pas " + expectedType.getSimpleName());
@@ -145,7 +151,11 @@ public final class ApplicationContext {
     }
 
     private static IllegalStateException creationError(String className, ReflectiveOperationException e) {
-        Throwable cause = e instanceof InvocationTargetException ite ? ite.getCause() : e;
+        // Si l'erreur vient du constructeur lui-même, on remonte sa vraie cause.
+        Throwable cause = e;
+        if (e instanceof InvocationTargetException) {
+            cause = e.getCause();
+        }
         return new IllegalStateException("Création impossible de " + className, cause);
     }
 

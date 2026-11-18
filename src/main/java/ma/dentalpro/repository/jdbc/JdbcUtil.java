@@ -21,12 +21,15 @@ public final class JdbcUtil {
             boolean returnGeneratedKeys,
             Object... parameters
     ) throws SQLException {
-        var generatedKeysOption = returnGeneratedKeys
-                ? Statement.RETURN_GENERATED_KEYS
-                : Statement.NO_GENERATED_KEYS;
+        // Faut-il demander à MySQL l'identifiant généré (utile pour un INSERT) ?
+        int generatedKeysOption = Statement.NO_GENERATED_KEYS;
+        if (returnGeneratedKeys) {
+            generatedKeysOption = Statement.RETURN_GENERATED_KEYS;
+        }
 
-        var statement = connection.prepareStatement(sql, generatedKeysOption);
-        for (var index = 0; index < parameters.length; index++) {
+        PreparedStatement statement = connection.prepareStatement(sql, generatedKeysOption);
+        // Le premier « ? » a le numéro 1 (et pas 0), d'où index + 1.
+        for (int index = 0; index < parameters.length; index++) {
             statement.setObject(index + 1, parameters[index]);
         }
         return statement;

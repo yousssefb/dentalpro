@@ -1,6 +1,8 @@
 package ma.dentalpro;
 
+import java.util.List;
 import ma.dentalpro.config.ApplicationContext;
+import ma.dentalpro.domain.Patient;
 import ma.dentalpro.shared.RepositoryException;
 import ma.dentalpro.ui.controllers.api.PatientController;
 
@@ -25,8 +27,10 @@ public class App {
             controller.getAllPatients();
 
             System.out.println("\nRecherche « ben » :");
-            controller.findByNomLike("ben")
-                    .forEach(p -> System.out.printf("- #%d %s, tél. %s%n", p.getId(), p.getNomComplet(), p.getTelephone()));
+            List<Patient> resultat = controller.findByNomLike("ben");
+            for (Patient p : resultat) {
+                System.out.println("- #" + p.getId() + " " + p.getNomComplet() + ", tél. " + p.getTelephone());
+            }
         } catch (RepositoryException e) {
             System.err.println(e.getSummary());
         }

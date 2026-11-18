@@ -21,13 +21,17 @@ public final class RowMappers {
                     + "assurance, archive, created_at";
 
     public static Patient toPatient(ResultSet rs) throws SQLException {
-        var sexe = rs.getString("sexe");
+        String sexe = rs.getString("sexe");
+        Sexe sexePatient = null;
+        if (sexe != null) {
+            sexePatient = Sexe.valueOf(sexe); // transforme "HOMME" en Sexe.HOMME
+        }
         return Patient.builder()
                 .id(rs.getLong("id"))
                 .nom(rs.getString("nom"))
                 .prenom(rs.getString("prenom"))
                 .dateNaissance(rs.getObject("date_naissance", LocalDate.class))
-                .sexe(sexe == null ? null : Sexe.valueOf(sexe))
+                .sexe(sexePatient)
                 .cin(rs.getString("cin"))
                 .passeport(rs.getString("passeport"))
                 .email(rs.getString("email"))

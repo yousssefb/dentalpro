@@ -1,8 +1,8 @@
 package ma.dentalpro.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import ma.dentalpro.domain.Patient;
@@ -16,13 +16,11 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public List<Patient> getPatientsSortedByName() {
-
-        // Tri croissant A → Z selon Patient.compareTo (nom, insensible à la casse).
-        return repo.findAll()
-                .stream()
-                .sorted()
-                .collect(Collectors.toCollection(ArrayList::new));
-
+        // On copie la liste reçue du repository pour pouvoir la trier sans risque.
+        List<Patient> patients = new ArrayList<>(repo.findAll());
+        // Tri croissant A → Z selon Patient.compareTo (nom puis prénom, insensible à la casse).
+        Collections.sort(patients);
+        return patients;
     }
 
     @Override

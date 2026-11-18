@@ -16,14 +16,14 @@ public final class JdbcConnectionFactory {
     private JdbcConnectionFactory() {}
 
     public static Connection createConnection(Properties properties) {
-        var driver   = required(properties, "dataSource.driver", null);
-        var url      = required(properties, "dataSource.url", "DENTALPRO_DB_URL");
-        var user     = required(properties, "dataSource.user", "DENTALPRO_DB_USER");
-        var password = required(properties, "dataSource.pass", "DENTALPRO_DB_PASSWORD");
+        String driver   = required(properties, "dataSource.driver", null);
+        String url      = required(properties, "dataSource.url", "DENTALPRO_DB_URL");
+        String user     = required(properties, "dataSource.user", "DENTALPRO_DB_USER");
+        String password = required(properties, "dataSource.pass", "DENTALPRO_DB_PASSWORD");
 
         try {
             Class.forName(driver);
-            var connection = DriverManager.getConnection(url, user, password);
+            Connection connection = DriverManager.getConnection(url, user, password);
             System.out.println("Connexion à la base de données réussie : " + url);
             return connection;
         } catch (ClassNotFoundException e) {
@@ -36,7 +36,10 @@ public final class JdbcConnectionFactory {
 
     /** Lit une propriété obligatoire ; la variable d'environnement est prioritaire si elle existe. */
     private static String required(Properties properties, String key, String envName) {
-        var value = envName == null ? null : System.getenv(envName);
+        String value = null;
+        if (envName != null) {
+            value = System.getenv(envName);
+        }
         if (value == null || value.isBlank()) {
             value = properties.getProperty(key);
         }
