@@ -38,7 +38,9 @@ Java Swing · JDBC · MySQL · Maven · Lombok — sans Spring, Hibernate ni aut
 
 ## Lancement
 
-- Depuis IntelliJ : exécuter `ma.dentalpro.App`.
+- **Interface Swing (fenêtre principale, M6)** : exécuter `ma.dentalpro.AppSwing` dans IntelliJ.
+  Menu *Modules → Charges* pour l'écran des dépenses.
+- **Console (smoke test Patient)** : exécuter `ma.dentalpro.App`.
 - En ligne de commande :
   ```bash
   mvn compile exec:java
@@ -113,6 +115,6 @@ ui (contrôleurs, vues Swing) → service (règles métier, droits) → reposito
 | M3 — *à compléter* | Consultations, interventions, antécédents |
 | M4 — *à compléter* | Facturation, paiements, situation financière, caisse |
 | M5 — *à compléter* | Référentiels (actes, médicaments), ordonnances, certificats |
-| M6 — *à compléter* | Charges, tableau de bord, reproductibilité |
+| M6 — *à compléter* | Charges, tableau de bord, reproductibilité (fenêtre principale) |
 
 Données de démonstration : exclusivement fictives.

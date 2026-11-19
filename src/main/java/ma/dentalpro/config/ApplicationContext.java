@@ -8,8 +8,11 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import ma.dentalpro.repository.api.ChargeRepo;
 import ma.dentalpro.repository.api.PatientRepo;
+import ma.dentalpro.service.api.ChargeService;
 import ma.dentalpro.service.api.PatientService;
+import ma.dentalpro.ui.controllers.api.ChargeController;
 import ma.dentalpro.ui.controllers.api.PatientController;
 
 /**
@@ -40,16 +43,27 @@ public final class ApplicationContext {
         try {
             connection = JdbcConnectionFactory.createConnection(props);
 
-            PatientRepo repo = createRepository(props.getProperty("dao.patientDao"), PatientRepo.class);
-            PatientService service = create(props.getProperty("service.patientService"),
-                    PatientService.class, PatientRepo.class, repo);
-            PatientController controller = create(props.getProperty("controller.patientController"),
-                    PatientController.class, PatientService.class, service);
+            // ----- Module Patient -----
+            PatientRepo patientRepo = createRepository(props.getProperty("dao.patientDao"), PatientRepo.class);
+            PatientService patientService = create(props.getProperty("service.patientService"),
+                    PatientService.class, PatientRepo.class, patientRepo);
+            PatientController patientController = create(props.getProperty("controller.patientController"),
+                    PatientController.class, PatientService.class, patientService);
+
+            // ----- Module Charge (M6) -----
+            ChargeRepo chargeRepo = createRepository(props.getProperty("dao.chargeDao"), ChargeRepo.class);
+            ChargeService chargeService = create(props.getProperty("service.chargeService"),
+                    ChargeService.class, ChargeRepo.class, chargeRepo);
+            ChargeController chargeController = create(props.getProperty("controller.chargeController"),
+                    ChargeController.class, ChargeService.class, chargeService);
 
             beansByClass.put(Connection.class, connection);
-            beansByClass.put(PatientRepo.class, repo);
-            beansByClass.put(PatientService.class, service);
-            beansByClass.put(PatientController.class, controller);
+            beansByClass.put(PatientRepo.class, patientRepo);
+            beansByClass.put(PatientService.class, patientService);
+            beansByClass.put(PatientController.class, patientController);
+            beansByClass.put(ChargeRepo.class, chargeRepo);
+            beansByClass.put(ChargeService.class, chargeService);
+            beansByClass.put(ChargeController.class, chargeController);
 
             // La JVM fermera la connexion juste avant l'arrêt de l'application.
             Runtime.getRuntime().addShutdownHook(new Thread(this::closeConnection));
