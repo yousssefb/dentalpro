@@ -8,6 +8,10 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import ma.dentalpro.repository.api.AntecedentRepo;
+import ma.dentalpro.repository.api.ConsultationRepo;
+import ma.dentalpro.repository.api.DossierAntecedentRepo;
+import ma.dentalpro.repository.api.InterventionRepo;
 import ma.dentalpro.repository.api.PatientRepo;
 import ma.dentalpro.service.api.PatientService;
 import ma.dentalpro.ui.controllers.api.PatientController;
@@ -50,6 +54,12 @@ public final class ApplicationContext {
             beansByClass.put(PatientRepo.class, repo);
             beansByClass.put(PatientService.class, service);
             beansByClass.put(PatientController.class, controller);
+
+            // Module Clinique (M3) : enregistre les repositories s'ils sont déclarés dans application.properties
+            registerRepoIfPresent(props, "dao.antecedentDao", AntecedentRepo.class);
+            registerRepoIfPresent(props, "dao.dossierAntecedentDao", DossierAntecedentRepo.class);
+            registerRepoIfPresent(props, "dao.consultationDao", ConsultationRepo.class);
+            registerRepoIfPresent(props, "dao.interventionDao", InterventionRepo.class);
 
             // La JVM fermera la connexion juste avant l'arrêt de l'application.
             Runtime.getRuntime().addShutdownHook(new Thread(this::closeConnection));
@@ -113,6 +123,14 @@ public final class ApplicationContext {
             return create(className, type, null, null);
         } catch (ReflectiveOperationException e) {
             throw creationError(className, e);
+        }
+    }
+
+    private <T> void registerRepoIfPresent(Properties props, String propKey, Class<T> type) {
+        String className = props.getProperty(propKey);
+        if (className != null && !className.isBlank()) {
+            T repo = createRepository(className.trim(), type);
+            beansByClass.put(type, repo);
         }
     }
 
