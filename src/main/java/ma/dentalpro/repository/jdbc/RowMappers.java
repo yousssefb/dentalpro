@@ -1,9 +1,11 @@
 package ma.dentalpro.repository.jdbc;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import ma.dentalpro.domain.Charge;
 import ma.dentalpro.domain.Patient;
 import ma.dentalpro.domain.Sexe;
 
@@ -19,6 +21,10 @@ public final class RowMappers {
     public static final String PATIENT_COLUMNS =
             "id, nom, prenom, date_naissance, sexe, cin, passeport, email, telephone, adresse, "
                     + "assurance, archive, created_at";
+
+    /** Colonnes lues par {@link #toCharge(ResultSet)}. */
+    public static final String CHARGE_COLUMNS =
+            "id, auteur_id, titre, description, montant, date_charge";
 
     public static Patient toPatient(ResultSet rs) throws SQLException {
         String sexe = rs.getString("sexe");
@@ -40,6 +46,18 @@ public final class RowMappers {
                 .assurance(rs.getString("assurance"))
                 .archive(rs.getBoolean("archive"))
                 .createdAt(rs.getObject("created_at", LocalDateTime.class))
+                .build();
+    }
+
+    /** Transforme une ligne de la table charge en objet Charge. */
+    public static Charge toCharge(ResultSet rs) throws SQLException {
+        return Charge.builder()
+                .id(rs.getLong("id"))
+                .auteurId(rs.getLong("auteur_id"))
+                .titre(rs.getString("titre"))
+                .description(rs.getString("description"))
+                .montant(rs.getObject("montant", BigDecimal.class))
+                .dateCharge(rs.getObject("date_charge", LocalDateTime.class))
                 .build();
     }
 }

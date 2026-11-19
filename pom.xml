@@ -25,7 +25,8 @@
     <maven.compiler.release>${java.version}</maven.compiler.release>
 
     <!-- Classe principale lancée par "mvn exec:java" et inscrite dans le manifeste du JAR. -->
-    <main.class>ma.dentalpro.App</main.class>
+    <!-- AppSwing = fenêtre principale ; App = smoke test console. -->
+    <main.class>ma.dentalpro.AppSwing</main.class>
 
     <!-- Versions centralisées des dépendances. -->
     <lombok.version>1.18.48</lombok.version>
